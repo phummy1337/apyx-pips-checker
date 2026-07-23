@@ -284,7 +284,7 @@ footer a:hover { color: var(--gray); }
             <button class="chip" id="chip-s2-current">Current</button>
             <button class="chip" id="chip-s2-proj">Straight-line to Oct 11</button>
           </div>
-          <div class="after">Season 2 keeps accruing until Oct 11 — your share dilutes as the total grows. Your own pips are also projected forward at the same rate if you use the projection.</div>
+          <div class="after">Season 2 keeps accruing until Oct 11 — a larger final pool dilutes the share your current pips represent. Use the projection for a conservative estimate, or enter your own figure.</div>
         </div>
 
       </div>
@@ -387,7 +387,6 @@ const state = {
   s1: null, s2: null,                  // per-user season data
   s2TotalNow: S2_SNAPSHOT_TOTAL,       // live pool total (updated from overview)
   s2Participants: 5640,
-  growMyPips: true,
   s2FieldTouched: false,
 };
 function projFactor() {
@@ -495,13 +494,8 @@ function recalc() {
             : (isFinite(tvl) && isFinite(ratio) ? tvl * ratio : NaN);
   const price = fdv / TOTAL_SUPPLY;
 
-  // if the pool total used is bigger than today's pool and the user opted in,
-  // scale their pips by the same growth factor (they keep earning at current share)
-  const poolGrowth = s2Total / state.s2TotalNow;
-  const s2pUsed = state.growMyPips && poolGrowth > 1 ? s2pNow * poolGrowth : s2pNow;
-
   const s1Share = s1p / S1_TOTAL_PIPS;
-  const s2Share = s2Total > 0 ? s2pUsed / s2Total : 0;
+  const s2Share = s2Total > 0 ? s2pNow / s2Total : 0;
   const s1Tokens = s1Share * s1pct * TOTAL_SUPPLY;
   const s2Tokens = s2Share * s2pct * TOTAL_SUPPLY;
   const s1Val = s1Tokens * price;
