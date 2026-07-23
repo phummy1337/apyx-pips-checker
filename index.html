@@ -466,7 +466,7 @@ function renderResults(addr) {
   $('results').classList.remove('hidden');
   $('calc-section').classList.remove('hidden');
 
-  if (!state.s2FieldTouched) setS2Field(Math.round(state.s2TotalNow * projFactor()), 'proj');
+  if (!state.s2FieldTouched) setS2Field(Math.round(state.s2TotalNow), 'cur');
   recalc();
   $('calc-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
