@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APYX Pips Checker — Airdrop Value Calculator</title>
-<meta name="description" content="Check your Apyx Season 1 and Season 2 pips balance and estimate the implied value of your APYX airdrop.">
+<title>Apyx — Pips & Airdrop Calculator</title>
+<meta name="description" content="Check your Season 1 and Season 2 pips balance and estimate the implied value of your APYX allocation.">
 <style>
 @font-face {
   font-family: 'Google Sans Flex';
@@ -33,9 +33,10 @@ html { background: var(--bg); }
 body {
   font-family: 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif;
   background:
-    radial-gradient(1100px 500px at 85% -10%, rgba(220,20,60,.09), transparent 60%),
-    radial-gradient(900px 600px at -10% 110%, rgba(220,20,60,.05), transparent 55%),
+    radial-gradient(1200px 600px at 88% -12%, rgba(220,20,60,.13), transparent 62%),
+    radial-gradient(1000px 700px at -12% 112%, rgba(220,20,60,.07), transparent 58%),
     var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -48,9 +49,10 @@ header {
   padding: 18px 0;
 }
 header .wrap { display: flex; align-items: center; justify-content: space-between; }
-.wordmark { font-weight: 800; font-style: italic; font-size: 22px; letter-spacing: .5px; text-decoration: none; color: var(--text); }
-.wordmark .x { color: var(--red); }
-.wordmark-sub { font-weight: 500; font-style: normal; color: var(--gray-dim); font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; margin-left: 12px; }
+.logo { display: inline-flex; align-items: center; text-decoration: none; }
+.logo svg { display: block; height: 20px; width: auto; }
+.wordmark-sub { font-weight: 500; font-style: normal; color: var(--gray-dim); font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; }
+.brand { display: flex; align-items: center; gap: 14px; }
 .hdr-link { color: var(--gray); font-size: 13px; text-decoration: none; border: 1px solid var(--border); padding: 8px 14px; border-radius: 4px; transition: border-color .15s, color .15s; }
 .hdr-link:hover { border-color: var(--gray); color: var(--text); }
 
@@ -134,8 +136,6 @@ section.block { margin-top: 44px; }
 }
 .chip:hover { border-color: var(--gray); color: var(--text); }
 .chip.active { border-color: var(--red); color: var(--red-bright); }
-details.adv { border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 4px; }
-details.adv summary { color: var(--gray-dim); font-size: 13px; cursor: pointer; margin-bottom: 12px; }
 .out-row { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--border-soft); }
 .out-row:last-of-type { border-bottom: none; }
 .out-row .l { color: var(--gray); font-size: 13.5px; }
@@ -165,8 +165,17 @@ footer a:hover { color: var(--gray); }
 
 <header>
   <div class="wrap">
-    <div>
-      <a class="wordmark" href="https://apyx.fi" target="_blank" rel="noopener">APY<span class="x">X</span></a>
+    <div class="brand">
+      <a class="logo" href="https://apyx.fi" target="_blank" rel="noopener" aria-label="Apyx">
+        <svg viewBox="0 0 1313.62 275.46" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <g fill="#ffffff">
+            <path d="M0,251.25v-10.22L241.03,0h68.87v275.46h-68.87v-34.43h-103.3l68.87-68.87h34.43v-68.87l-172.16,172.16H0v-24.21Z"/>
+            <path d="M334.57,82.59V0h241.03l-68.87,68.87h-103.3v206.6h-68.87V82.59ZM437.87,103.3h68.87L610.04,0h34.43v68.87l-103.3,103.3h-103.3v-68.87Z"/>
+            <path d="M669.15,34.43V0h68.87l68.87,68.87-51.65,51.65-86.08-86.08ZM772.44,137.73L910.18,0h68.87v34.43l-137.73,137.73v103.3h-68.87v-137.73Z"/>
+          </g>
+          <path fill="#dc143c" d="M1003.72,251.25v-10.22L1244.75,0h68.87v34.43l-241.03,241.03h-68.87v-24.21ZM1003.72,34.43V0h68.87l68.87,68.87-51.65,51.65-86.08-86.08ZM1175.88,206.6l51.65-51.65,86.08,86.08v34.43h-68.87l-68.87-68.87Z"/>
+        </svg>
+      </a>
       <span class="wordmark-sub">Pips &amp; Airdrop Calculator</span>
     </div>
     <a class="hdr-link" href="https://app.apyx.fi/rewards" target="_blank" rel="noopener">Open Apyx App &rarr;</a>
@@ -177,10 +186,10 @@ footer a:hover { color: var(--gray); }
 
   <div class="hero">
     <div class="eyebrow">01. Rewards: <span class="sub">Season 1 + Season 2 Pips</span></div>
-    <h1>What is your <span class="red">airdrop</span> actually worth?</h1>
-    <p class="lede">Paste any wallet address to pull its <b>Season 1</b> (final) and <b>Season 2</b> (live) pips
-    directly from Apyx, then model the implied value of your APYX allocation under your own
-    TVL and valuation assumptions. Pips are tracked per address across all three chains.</p>
+    <h1>Check your <span class="red">pips</span> and model your APYX allocation.</h1>
+    <p class="lede">Enter a wallet address to retrieve its <b>Season 1</b> (final) and <b>Season 2</b> (live) pips,
+    then estimate the implied value of your APYX allocation under your own TVL and valuation
+    assumptions. Pips are tracked per address across Ethereum, Base and BNB Chain.</p>
   </div>
 
   <div class="addr-row">
@@ -214,12 +223,12 @@ footer a:hover { color: var(--gray); }
         <div class="s" id="s2-sub">&nbsp;</div>
       </div>
       <div class="card">
-        <div class="k">S1 Rank &amp; Tier</div>
+        <div class="k">Season 1 Rank</div>
         <div class="v white" id="s1-rank">—</div>
         <div class="s" id="s1-tier">&nbsp;</div>
       </div>
       <div class="card">
-        <div class="k">S2 Rank &amp; Tier</div>
+        <div class="k">Season 2 Rank</div>
         <div class="v white" id="s2-rank">—</div>
         <div class="s" id="s2-tier">&nbsp;</div>
       </div>
@@ -245,7 +254,7 @@ footer a:hover { color: var(--gray); }
           <label>TVL at TGE <span class="hint">(apxUSD supply, USD)</span></label>
           <input type="text" id="in-tvl" inputmode="decimal" value="327,070,000">
           <div class="quick">
-            <button class="chip" data-tvl="327070000">Current $327M</button>
+            <button class="chip" data-tvl="327070000">Current</button>
             <button class="chip" data-tvl="500000000">$500M</button>
             <button class="chip" data-tvl="750000000">$750M</button>
             <button class="chip" data-tvl="1000000000">$1B</button>
@@ -279,24 +288,6 @@ footer a:hover { color: var(--gray); }
           <div class="after">Season 2 keeps accruing until Oct 11 — your share dilutes as the total grows. Your own pips are also projected forward at the same rate if you use the projection.</div>
         </div>
 
-        <details class="adv">
-          <summary>Advanced assumptions</summary>
-          <div class="field">
-            <label>Season 1 airdrop allocation <span class="hint">(% of supply — docs: 5%)</span></label>
-            <input type="text" id="in-s1pct" inputmode="decimal" value="5">
-          </div>
-          <div class="field">
-            <label>Season 2 airdrop allocation <span class="hint">(% of supply — docs &amp; site: 6%)</span></label>
-            <input type="text" id="in-s2pct" inputmode="decimal" value="6">
-          </div>
-          <div class="field">
-            <label>Project my S2 pips forward with the pool <span class="hint">(keep earning at current rate)</span></label>
-            <div class="quick">
-              <button class="chip active" id="chip-grow-yes">Yes</button>
-              <button class="chip" id="chip-grow-no">No — freeze my pips</button>
-            </div>
-          </div>
-        </details>
       </div>
 
       <div class="panel">
@@ -317,20 +308,18 @@ footer a:hover { color: var(--gray); }
   </section>
 
   <div class="notes">
-    <b>How this works.</b> Pips balances are fetched live from the public Apyx rewards API
-    (<span style="font-family:ui-monospace,monospace">api.apyx.fi/v1/rewards/seasons/&#123;1,2&#125;/users/&#123;address&#125;</span>).
-    Season 1 ended May 22, 2026 with <b>231.01B</b> total pips across 4,405 participants and an announced allocation of
-    <b>5%</b> of APYX supply. Season 2 runs May 23 &rarr; October 11, 2026 with <b>6%</b> of supply up for grabs
-    (per apyx.fi), ahead of TGE on <b>October 13, 2026</b>. APYX has a fixed supply of 100M with no inflation.
-    Value shown = your pips &divide; season total &times; season allocation &times; implied APYX price, where price = FDV &divide; 100M
-    and FDV = TVL &times; your chosen multiple (or your direct market-cap input).
+    <b>How this works.</b> Season 1 closed on May 22, 2026 with an allocation of <b>5%</b> of APYX supply.
+    Season 2 runs through <b>October 11, 2026</b> with <b>6%</b> of supply allocated, ahead of TGE on
+    <b>October 13, 2026</b>. APYX has a fixed supply of 100,000,000 tokens. Implied value = your share of a
+    season's pips &times; that season's allocation &times; implied APYX price, where price = FDV &divide; total supply
+    and FDV = TVL &times; your selected multiple (or your direct market-cap input).
     <br><br>
-    <b>This is a community tool, not affiliated with Apyx.</b> Allocations, season totals and mechanics can change;
-    ratios are your assumptions, not predictions. Nothing here is financial advice.
+    Estimates are illustrative only and depend entirely on your assumptions. Allocations, season totals and
+    reward mechanics are subject to change. Nothing on this page constitutes financial advice.
   </div>
 
   <footer>
-    <span>APYX.fi &middot; community pips checker</span>
+    <span>&copy; 2026 Apyx &middot; APYX.fi</span>
     <span><a href="https://docs.apyx.fi" target="_blank" rel="noopener">Docs</a> &middot; <a href="https://app.apyx.fi/leaderboard" target="_blank" rel="noopener">Leaderboard</a></span>
   </footer>
 </div>
@@ -340,6 +329,8 @@ footer a:hover { color: var(--gray); }
 /* ---------- constants (verified 2026-07-22) ---------- */
 const TOTAL_SUPPLY = 100_000_000;
 const S1_TOTAL_PIPS = 231_012_339_854;        // final, from /seasons/1/overview
+const S1_PARTICIPANTS = 4405;
+const S1_PCT = 0.05, S2_PCT = 0.06;           // announced season allocations
 const S2_SNAPSHOT_TOTAL = 1_435_747_242_635;  // /seasons/2/overview @ 2026-07-22
 const S2_START = Date.UTC(2026, 4, 23);       // May 23 2026
 const S2_END   = Date.UTC(2026, 9, 11);       // Oct 11 2026
@@ -389,15 +380,6 @@ function parseNum(s) {
   if (s == null) return NaN;
   const v = parseFloat(String(s).replace(/[$,\s]/g, ''));
   return isFinite(v) ? v : NaN;
-}
-function tierFromPct(p) {
-  if (p == null) return null;
-  if (p <= 1) return 'God'; if (p <= 10) return 'Legend'; if (p <= 30) return 'Champion';
-  if (p <= 50) return 'Enforcer'; return 'Recruit';
-}
-function tierLabel(apiTier, pct) {
-  const t = apiTier ? apiTier.charAt(0).toUpperCase() + apiTier.slice(1) : tierFromPct(pct);
-  return t || '—';
 }
 const $ = id => document.getElementById(id);
 
@@ -460,21 +442,17 @@ function renderResults(addr) {
 
   $('results-addr').textContent = addr.slice(0, 6) + '…' + addr.slice(-4);
   $('s1-pips').textContent = fmtPips(s1p);
-  $('s1-sub').textContent = s1p > 0
-    ? nf0.format(s1p) + ' pips · ' + (100 * s1p / S1_TOTAL_PIPS).toFixed(3) + '% of season'
-    : 'No Season 1 pips for this address';
+  $('s1-sub').innerHTML = s1p > 0 ? '&nbsp;' : 'No Season 1 pips for this address';
   $('s2-pips').textContent = fmtPips(s2p);
-  $('s2-sub').textContent = s2p > 0
-    ? nf0.format(s2p) + ' pips · ' + (100 * s2p / state.s2TotalNow).toFixed(3) + '% of pool right now'
-    : 'No Season 2 pips (yet) for this address';
+  $('s2-sub').innerHTML = s2p > 0 ? '&nbsp;' : 'No Season 2 pips (yet) for this address';
 
   $('s1-rank').textContent = state.s1.rank ? '#' + nf0.format(state.s1.rank) : '—';
   $('s1-tier').textContent = state.s1.rank
-    ? tierLabel(state.s1.tier, Number(state.s1.rankPercentile)) + ' · top ' + Number(state.s1.rankPercentile).toFixed(1) + '%'
+    ? 'of ' + nf0.format(S1_PARTICIPANTS) + ' participants'
     : 'Not ranked in Season 1';
   $('s2-rank').textContent = state.s2.rank ? '#' + nf0.format(state.s2.rank) : '—';
   $('s2-tier').textContent = state.s2.rank
-    ? tierLabel(state.s2.tier, Number(state.s2.rankPercentile)) + ' · top ' + Number(state.s2.rankPercentile).toFixed(1) + '% of ' + nf0.format(state.s2Participants)
+    ? 'of ' + nf0.format(state.s2Participants) + ' participants'
     : 'Not ranked in Season 2';
 
   const boosted = Number(state.s2.alumniMultiplier || 0) > 0 || (s1p > 0 && s2p > 0);
@@ -486,7 +464,7 @@ function renderResults(addr) {
     $('calc-section').classList.add('hidden');
     return;
   }
-  setStatus('Balances loaded live from api.apyx.fi.', 'ok');
+  setStatus('');
   $('results').classList.remove('hidden');
   $('calc-section').classList.remove('hidden');
 
@@ -510,8 +488,7 @@ function recalc() {
   const tvl = parseNum($('in-tvl').value);
   const ratio = parseNum($('in-ratio').value);
   const fdvOverride = parseNum($('in-fdv').value);
-  const s1pct = parseNum($('in-s1pct').value) / 100;
-  const s2pct = parseNum($('in-s2pct').value) / 100;
+  const s1pct = S1_PCT, s2pct = S2_PCT;
   let s2Total = parseNum($('in-s2total').value);
   if (!isFinite(s2Total) || s2Total <= 0) s2Total = state.s2TotalNow;
 
@@ -537,7 +514,7 @@ function recalc() {
   $('o-s1share').textContent = (100 * s1Share).toFixed(4) + '%';
   $('o-s1val').innerHTML = isFinite(s1Val)
     ? nf0.format(Math.round(s1Tokens)) + ' APYX <small>&rarr;</small> ' + fmtUsdFull(s1Val) : '—';
-  $('o-s2share').textContent = (100 * s2Share).toFixed(4) + '%' + (state.growMyPips && poolGrowth > 1 ? '' : ' (frozen pips)');
+  $('o-s2share').textContent = (100 * s2Share).toFixed(4) + '%';
   $('o-s2val').innerHTML = isFinite(s2Val)
     ? nf0.format(Math.round(s2Tokens)) + ' APYX <small>&rarr;</small> ' + fmtUsdFull(s2Val) : '—';
   $('o-total').textContent = isFinite(total) && total > 0 ? fmtUsdFull(total) : '—';
@@ -549,7 +526,7 @@ function recalc() {
 /* ---------- wiring ---------- */
 $('check').addEventListener('click', lookup);
 $('addr').addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
-['in-tvl', 'in-ratio', 'in-fdv', 'in-s1pct', 'in-s2pct'].forEach(id =>
+['in-tvl', 'in-ratio', 'in-fdv'].forEach(id =>
   $(id).addEventListener('input', recalc));
 $('in-s2total').addEventListener('input', () => {
   state.s2FieldTouched = true;
@@ -563,8 +540,6 @@ document.querySelectorAll('.chip[data-ratio]').forEach(b =>
   b.addEventListener('click', () => { $('in-ratio').value = b.dataset.ratio; $('in-fdv').value = ''; recalc(); }));
 $('chip-s2-current').addEventListener('click', () => { state.s2FieldTouched = true; setS2Field(Math.round(state.s2TotalNow), 'cur'); });
 $('chip-s2-proj').addEventListener('click', () => { state.s2FieldTouched = true; setS2Field(Math.round(state.s2TotalNow * projFactor()), 'proj'); });
-$('chip-grow-yes').addEventListener('click', () => { state.growMyPips = true; $('chip-grow-yes').classList.add('active'); $('chip-grow-no').classList.remove('active'); recalc(); });
-$('chip-grow-no').addEventListener('click', () => { state.growMyPips = false; $('chip-grow-no').classList.add('active'); $('chip-grow-yes').classList.remove('active'); recalc(); });
 
 const qsAddr = new URLSearchParams(location.search).get('a');
 if (qsAddr && /^0x[0-9a-fA-F]{40}$/.test(qsAddr)) {
