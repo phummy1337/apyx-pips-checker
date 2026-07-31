@@ -448,7 +448,25 @@ const state = {
   s2TotalNow: S2_SNAPSHOT_TOTAL,       // live pool total (updated from overview)
   s2Participants: 5640,
   s2FieldTouched: false,
+  tvlTouched: false,
 };
+
+/* live apxUSD supply (= TVL) summed across chains; falls back to the baked default */
+async function loadTvl() {
+  const j = u => fetch(u).then(r => r.json());
+  try {
+    const [eth, base, bnb] = await Promise.all([
+      j('https://eth.blockscout.com/api/v2/tokens/0x98A878b1Cd98131B271883B390f68D2c90674665').then(d => Number(d.total_supply) / 1e18),
+      j('https://base.blockscout.com/api/v2/tokens/0xD993935E13851dd7517af10687EC7e5022127228').then(d => Number(d.total_supply) / 1e18),
+      j('https://api.binplorer.com/getTokenInfo/0x6b3788Fd6604BBF03c5378D24e57BB334BAAD4aF?apiKey=freekey').then(d => Number(d.totalSupply) / 1e18).catch(() => 0),
+    ]);
+    const tot = Math.round(eth + base + bnb);
+    if (!(eth > 1e6) || !isFinite(tot)) return;   // sanity: never swap in a broken number
+    const chip = document.querySelector('.chip[data-tvl]');
+    if (chip) chip.dataset.tvl = tot;
+    if (!state.tvlTouched) { $('in-tvl').value = nf0.format(tot); recalc(); }
+  } catch (e) { /* keep baked default */ }
+}
 function projFactor() {
   const now = Date.now();
   const elapsed = Math.min(Math.max(now - S2_START, 1), S2_END - S2_START);
@@ -581,6 +599,8 @@ $('check').addEventListener('click', lookup);
 $('addr').addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
 ['in-tvl', 'in-ratio', 'in-fdv'].forEach(id =>
   $(id).addEventListener('input', recalc));
+$('in-tvl').addEventListener('input', () => { state.tvlTouched = true; });
+loadTvl();
 $('in-s2total').addEventListener('input', () => {
   state.s2FieldTouched = true;
   $('chip-s2-current').classList.remove('active');
