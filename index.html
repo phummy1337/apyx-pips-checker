@@ -269,9 +269,9 @@ footer a:hover { color: var(--gray); }
 
         <div class="field">
           <label>TVL at TGE <span class="hint">(apxUSD supply, USD)</span></label>
-          <input type="text" id="in-tvl" inputmode="decimal" value="339,280,000">
+          <input type="text" id="in-tvl" inputmode="decimal" value="312,070,000">
           <div class="quick">
-            <button class="chip" data-tvl="339280000">Current</button>
+            <button class="chip" data-tvl="312070000">Current</button>
             <button class="chip" data-tvl="500000000">$500M</button>
             <button class="chip" data-tvl="750000000">$750M</button>
             <button class="chip" data-tvl="1000000000">$1B</button>
@@ -451,20 +451,28 @@ const state = {
   tvlTouched: false,
 };
 
-/* live apxUSD supply (= TVL) summed across chains; falls back to the baked default */
+/* live Total apxUSD Supply (= TVL), primary source: Apyx's Accountable proof-of-solvency
+   feed (15-min verification interval); fallback: on-chain totalSupply summed across chains */
+function applyTvl(tot) {
+  if (!isFinite(tot) || tot < 1e6) return false;  // sanity: never swap in a broken number
+  const chip = document.querySelector('.chip[data-tvl]');
+  if (chip) chip.dataset.tvl = Math.round(tot);
+  if (!state.tvlTouched) { $('in-tvl').value = nf0.format(Math.round(tot)); recalc(); }
+  return true;
+}
 async function loadTvl() {
   const j = u => fetch(u).then(r => r.json());
+  try {
+    const d = await j('https://api.accountable.apyx.fi/dashboard');
+    if (applyTvl(Number(d.data.reserves.total_supply.value))) return;
+  } catch (e) { /* fall through to on-chain */ }
   try {
     const [eth, base, bnb] = await Promise.all([
       j('https://eth.blockscout.com/api/v2/tokens/0x98A878b1Cd98131B271883B390f68D2c90674665').then(d => Number(d.total_supply) / 1e18),
       j('https://base.blockscout.com/api/v2/tokens/0xD993935E13851dd7517af10687EC7e5022127228').then(d => Number(d.total_supply) / 1e18),
       j('https://api.binplorer.com/getTokenInfo/0x6b3788Fd6604BBF03c5378D24e57BB334BAAD4aF?apiKey=freekey').then(d => Number(d.totalSupply) / 1e18).catch(() => 0),
     ]);
-    const tot = Math.round(eth + base + bnb);
-    if (!(eth > 1e6) || !isFinite(tot)) return;   // sanity: never swap in a broken number
-    const chip = document.querySelector('.chip[data-tvl]');
-    if (chip) chip.dataset.tvl = tot;
-    if (!state.tvlTouched) { $('in-tvl').value = nf0.format(tot); recalc(); }
+    if (eth > 1e6) applyTvl(eth + base + bnb);
   } catch (e) { /* keep baked default */ }
 }
 function projFactor() {
