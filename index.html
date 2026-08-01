@@ -143,6 +143,8 @@ section.block { margin-top: 44px; }
   font-family: inherit; font-size: 12px; padding: 4px 10px; border-radius: 3px; cursor: pointer;
 }
 .chip:hover { border-color: var(--gray); color: var(--text); }
+.chip .chipval { margin-left: 6px; opacity: .75; font-variant-numeric: tabular-nums; }
+.chip .rec { margin-left: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; opacity: .65; }
 .chip.active { border-color: var(--red); color: var(--red-bright); }
 .out-row { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--border-soft); }
 .out-row:last-of-type { border-bottom: none; }
@@ -299,10 +301,10 @@ footer a:hover { color: var(--gray); }
           <label>Projected final Season 2 total pips <span class="hint">(all participants, at Oct 11 close)</span></label>
           <input type="text" id="in-s2total" inputmode="decimal" value="">
           <div class="quick">
-            <button class="chip" id="chip-s2-current" title="Use the season-2 pip total as it stands right now">Today’s total</button>
-            <button class="chip" id="chip-s2-proj" title="Estimate the final pool: assumes everyone keeps earning pips at the season’s average pace until it closes on Oct 11">Est. final total (Oct 11)</button>
+            <button class="chip" id="chip-s2-current" title="Pretends the season ended today — nobody earns another pip. Flatters your share.">If the season ended today<span class="chipval" id="chipval-cur"></span></button>
+            <button class="chip" id="chip-s2-proj" title="Assumes the pool keeps growing at the season’s average pace until the Oct 11 close — the realistic case.">Pool keeps growing to Oct 11<span class="chipval" id="chipval-proj"></span><span class="rec">recommended</span></button>
           </div>
-          <div class="after">Season 2 keeps accruing until Oct 11, and a larger final pool dilutes the share your current pips represent. “Est. final total” projects today’s pool forward at the season’s average pace — the conservative choice. Or type your own figure.</div>
+          <div class="after">Everyone keeps earning pips until Oct 11, so the final pool will be bigger than today’s — and a bigger pool makes your pips a smaller slice. The first chip ignores that (best case); the second assumes growth at the season’s average pace (realistic). Or type your own figure.</div>
         </div>
 
       </div>
@@ -558,7 +560,14 @@ function renderResults(addr) {
 }
 
 /* ---------- calculator ---------- */
+function paintChipVals() {
+  const cur = state.s2TotalNow, proj = Math.round(cur * projFactor());
+  const c=$('chipval-cur'), pr=$('chipval-proj');
+  if (c)  c.textContent  = '\u00b7 ' + fmtPips(cur);
+  if (pr) pr.textContent = '\u00b7 ' + fmtPips(proj);
+}
 function setS2Field(v, which) {
+  paintChipVals();
   $('in-s2total').value = nf0.format(v);
   $('chip-s2-current').classList.toggle('active', which === 'cur');
   $('chip-s2-proj').classList.toggle('active', which === 'proj');
@@ -621,6 +630,7 @@ document.querySelectorAll('.chip[data-ratio]').forEach(b =>
   b.addEventListener('click', () => { $('in-ratio').value = b.dataset.ratio; $('in-fdv').value = ''; recalc(); }));
 $('chip-s2-current').addEventListener('click', () => { state.s2FieldTouched = true; setS2Field(Math.round(state.s2TotalNow), 'cur'); });
 $('chip-s2-proj').addEventListener('click', () => { state.s2FieldTouched = true; setS2Field(Math.round(state.s2TotalNow * projFactor()), 'proj'); });
+paintChipVals();   // show both pool figures on the chips from the start
 
 /* Top-250 wallets by pips rank (snapshot 2026-07-23, verified via the rewards API;
    ranks 1-2 of both seasons excluded). Ranks drift as Season 2 accrues. */
