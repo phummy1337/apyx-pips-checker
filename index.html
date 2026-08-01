@@ -562,9 +562,11 @@ function renderResults(addr) {
 /* ---------- calculator ---------- */
 function paintChipVals() {
   const cur = state.s2TotalNow, proj = Math.round(cur * projFactor());
-  const c=$('chipval-cur'), pr=$('chipval-proj');
-  if (c)  c.textContent  = '\u00b7 ' + fmtPips(cur);
-  if (pr) pr.textContent = '\u00b7 ' + fmtPips(proj);
+  const mine = state.s2 ? Number(state.s2.totalPoints || 0) : 0;
+  const shr = t => (mine > 0 && t > 0) ? ' \u2192 your share ' + (mine / t * 100).toFixed(3) + '%' : '';
+  const c = $('chipval-cur'), pr = $('chipval-proj');
+  if (c)  c.textContent  = '\u00b7 pool ' + fmtPips(cur) + shr(cur);
+  if (pr) pr.textContent = '\u00b7 pool ' + fmtPips(proj) + shr(proj);
 }
 function setS2Field(v, which) {
   paintChipVals();
