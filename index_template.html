@@ -301,10 +301,10 @@ footer a:hover { color: var(--gray); }
           <label>Projected final Season 2 total pips <span class="hint">(all participants, at Oct 11 close)</span></label>
           <input type="text" id="in-s2total" inputmode="decimal" value="">
           <div class="quick">
-            <button class="chip" id="chip-s2-current" title="Pretends the season ended today — nobody earns another pip. Flatters your share.">If the season ended today<span class="chipval" id="chipval-cur"></span></button>
-            <button class="chip" id="chip-s2-proj" title="Assumes the pool keeps growing at the season’s average pace until the Oct 11 close — the realistic case.">Pool keeps growing to Oct 11<span class="chipval" id="chipval-proj"></span><span class="rec">recommended</span></button>
+            <button class="chip" id="chip-s2-current" title="Holds the pool at today’s size. Mathematically identical to the pool growing while YOU keep earning at your current relative pace — your slice stays the same either way.">You keep your pace<span class="chipval" id="chipval-cur"></span></button>
+            <button class="chip" id="chip-s2-proj" title="The pool keeps growing at the season’s average pace until Oct 11 while your pips stay frozen at today’s number — you stop, everyone else keeps earning. Your slice shrinks accordingly.">You stop earning today<span class="chipval" id="chipval-proj"></span><span class="rec">floor</span></button>
           </div>
-          <div class="after">Everyone keeps earning pips until Oct 11, so the final pool will be bigger than today’s — and a bigger pool makes your pips a smaller slice. The first chip ignores that (best case); the second assumes growth at the season’s average pace (realistic). Or type your own figure.</div>
+          <div class="after">Your share = your pips ÷ the final pool. “You keep your pace” assumes your earning grows with the pool, so your slice holds at today’s percentage. “You stop earning today” freezes your pips while the pool keeps growing to Oct 11 — the floor if you withdraw now. The truth lands between them; or type your own pool figure.</div>
         </div>
 
       </div>
