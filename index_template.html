@@ -418,26 +418,24 @@ const API = 'https://api.apyx.fi/v1/rewards';
 
 /* ---------- fetch through CORS-proxy chain ---------- */
 async function fetchJson(url) {
-  const attempts = [
-    url,
-    'https://corsproxy.io/?url=' + encodeURIComponent(url),
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
-    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
-  ];
   let lastErr;
-  for (const u of attempts) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), 10000);
-      const r = await fetch(u, { signal: ctl.signal });
+      const r = await fetch(url, { signal: ctl.signal });
       clearTimeout(t);
-      if (!r.ok) { lastErr = new Error('HTTP ' + r.status); continue; }
-      const j = await r.json();
-      if (j && j.success && j.data) return j.data;
-      lastErr = new Error('bad payload');
+      if (!r.ok) {
+        lastErr = new Error('HTTP ' + r.status);
+      } else {
+        const j = await r.json();
+        if (j && j.success && j.data) return j.data;
+        lastErr = new Error('bad payload');
+      }
     } catch (e) { lastErr = e; }
+    if (attempt < 2) await new Promise(res => setTimeout(res, 400 * (attempt + 1)));
   }
-  throw lastErr || new Error('all fetch routes failed');
+  throw lastErr || new Error('request failed');
 }
 
 /* ---------- formatting ---------- */
@@ -530,7 +528,7 @@ async function lookup() {
     history.replaceState(null, '', url);
   } catch (e) {
     console.error(e);
-    setStatus('Could not reach the Apyx API (direct + proxies all failed). Try again in a minute.', 'err');
+    setStatus('Could not reach the Apyx rewards API. Please try again in a moment.', 'err');
   } finally {
     $('check').disabled = false;
   }
