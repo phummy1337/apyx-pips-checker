@@ -423,7 +423,7 @@ async function fetchJson(url) {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const ctl = new AbortController();
-      const t = setTimeout(() => ctl.abort(), 10000);
+      const t = setTimeout(() => ctl.abort(), 15000);
       const r = await fetch(url, { signal: ctl.signal });
       clearTimeout(t);
       if (!r.ok) {
@@ -502,13 +502,18 @@ function projFactor() {
 }
 
 /* ---------- pips lookup ---------- */
-async function lookup() {
+let lookupSeq = 0;
+function setBusy(b) { $('check').disabled = b; $('random').disabled = b; }
+
+async function lookup(opts) {
+  opts = opts || {};
   const addr = $('addr').value.trim().toLowerCase();
   if (!/^0x[0-9a-f]{40}$/.test(addr)) {
     setStatus('That does not look like a valid EVM address (0x + 40 hex characters).', 'err');
-    return;
+    return false;
   }
-  $('check').disabled = true;
+  const seq = ++lookupSeq;                 // only the newest lookup may touch the UI
+  setBusy(true);
   setStatus('Fetching pips from Apyx…');
   $('results').classList.add('hidden');
   $('calc-section').classList.add('hidden');
@@ -518,6 +523,7 @@ async function lookup() {
       fetchJson(`${API}/seasons/2/users/${addr}`),
       fetchJson(`${API}/seasons/2/overview`).catch(() => null),
     ]);
+    if (seq !== lookupSeq) return false;    // superseded by a newer lookup
     state.s1 = s1; state.s2 = s2;
     if (ov2 && ov2.totalPoints) {
       state.s2TotalNow = Number(ov2.totalPoints);
@@ -527,11 +533,14 @@ async function lookup() {
     const url = new URL(location.href);
     url.searchParams.set('a', addr);
     history.replaceState(null, '', url);
+    return true;
   } catch (e) {
+    if (seq !== lookupSeq) return false;    // stale failure must not overwrite good results
     console.error(e);
-    setStatus('Could not reach the Apyx rewards API. Please try again in a moment.', 'err');
+    if (!opts.quiet) setStatus('Could not reach the Apyx rewards API. Please try again in a moment.', 'err');
+    return false;
   } finally {
-    $('check').disabled = false;
+    if (seq === lookupSeq) setBusy(false);
   }
 }
 function setStatus(msg, cls) {
@@ -633,7 +642,7 @@ function recalc() {
 
 /* ---------- wiring ---------- */
 $('check').addEventListener('click', lookup);
-$('addr').addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+$('addr').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('check').disabled) lookup(); });
 ['in-tvl', 'in-ratio', 'in-fdv'].forEach(id =>
   $(id).addEventListener('input', recalc));
 $('in-tvl').addEventListener('input', () => { state.tvlTouched = true; });
@@ -701,10 +710,14 @@ const TOP_WALLETS = [
 '0x892282e7d97f05caa09dbf2b56bd05d0e71b7dae', '0x1d8177897fc90819cf644fa84b3247ac690985d5', '0x7413522ca4b846ff826e6d757af70a2cb4083065', '0x98c666a85e91fff9afda734ef73762376ed0dee8',
 '0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb', '0xe41be7b340f7c2eda4da1e99b42ee1b228b526b7', '0x93916f850e2522ecfa0b71b58d24b1d6fdbedf1d'
 ];
-$('random').addEventListener('click', () => {
+$('random').addEventListener('click', async () => {
   if (!TOP_WALLETS.length) return;
-  $('addr').value = TOP_WALLETS[Math.floor(Math.random() * TOP_WALLETS.length)];
-  lookup();
+  const pool = TOP_WALLETS.slice();
+  // if one wallet fails to load, quietly try another before surfacing an error
+  for (let tries = 0; tries < 3 && pool.length; tries++) {
+    $('addr').value = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+    if (await lookup({ quiet: tries < 2 })) return;
+  }
 });
 
 const qsAddr = new URLSearchParams(location.search).get('a');
