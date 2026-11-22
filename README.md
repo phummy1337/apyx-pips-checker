@@ -1,6 +1,6 @@
 # APYX Pips & Airdrop Calculator
 
-Official Apyx pips & airdrop calculator. Paste a wallet address (Ethereum / Base / BNB — pips are tracked per address across all chains) to fetch its **Season 1** (final) and **Season 2** (live) pips from the public Apyx rewards API, then model the implied USD value of the APYX airdrop under your own assumptions (TVL at TGE, FDV/TVL ratio or direct market cap, projected final S2 pips pool).
+Official Apyx pips & airdrop calculator. Paste an EVM (0x…) or Solana wallet address (Ethereum / Base / BNB / Solana; pips are tracked per address across all chains) to fetch its **Season 1** (final) and **Season 2** (live) pips from the public Apyx rewards API, then model the implied USD value of the APYX airdrop under your own assumptions (TVL at TGE, FDV/TVL ratio or direct market cap, projected final S2 pips pool).
 
 **Live:** https://apyxcalculator.fi (the old https://phummy1337.github.io/apyx-pips-checker/ URL redirects here)
 
@@ -10,7 +10,7 @@ Official Apyx pips & airdrop calculator. Paste a wallet address (Ethereum / Base
 - Season 1: 231.01B total pips (final, ended May 22 2026), 5% of APYX supply.
 - Season 2: live until Oct 11 2026, 6% of supply. TGE Oct 13 2026. 100M APYX fixed supply.
 - Implied value = your pips ÷ season total × season allocation × (FDV ÷ 100M).
-- Shareable links: `/?a=0x…` auto-loads an address.
+- Shareable links: `/?a=` followed by an EVM or Solana address auto-loads it.
 
 ## Files
 

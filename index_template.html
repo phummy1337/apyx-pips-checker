@@ -110,7 +110,7 @@ h1 .red { color: var(--red); }
 .btn-ghost { background: transparent; color: var(--gray); border: 1px solid var(--border); }
 .btn-ghost:hover { background: rgba(255,255,255,.06); color: var(--text); }
 .btn-ghost:disabled { background: transparent; border-color: var(--border-soft); }
-.chains { display: flex; gap: 14px; align-items: center; color: var(--gray-dim); font-size: 12.5px; margin-bottom: 8px; }
+.chains { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; color: var(--gray-dim); font-size: 12.5px; margin-bottom: 8px; }
 .chains .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: 1px; }
 .status { min-height: 22px; font-size: 13.5px; color: var(--gray-dim); margin-top: 6px; }
 .status.err { color: var(--red-bright); }
@@ -231,7 +231,7 @@ footer a:hover { color: var(--gray); }
   </div>
 
   <div class="addr-row">
-    <input id="addr" class="addr-input" placeholder="0x… wallet address (Ethereum / Base / BNB)" spellcheck="false" autocomplete="off">
+    <input id="addr" class="addr-input" placeholder="EVM (0x…) or Solana address" spellcheck="false" autocomplete="off">
     <button id="check" class="btn">Check Pips</button>
     <button id="random" class="btn btn-ghost" title="Look up a randomly selected top-250 wallet">Random Wallet</button>
   </div>
@@ -239,6 +239,7 @@ footer a:hover { color: var(--gray); }
     <span><span class="dot" style="background:#8a92b2"></span>Ethereum</span>
     <span><span class="dot" style="background:#2151f5"></span>Base</span>
     <span><span class="dot" style="background:#f0b90b"></span>BNB Chain</span>
+    <span><span class="dot" style="background:#9945FF"></span>Solana</span>
     <span style="margin-left:auto">One balance per address — deposits on every chain count toward the same pips total.</span>
   </div>
   <div id="status" class="status"></div>
@@ -462,6 +463,46 @@ function parseNum(s) {
 }
 const $ = id => document.getElementById(id);
 
+/* ---------- address parsing (EVM + Solana) ---------- */
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+function parseWalletAddress(raw) {
+  const s = String(raw || '').trim();
+  if (/^0x[0-9a-fA-F]{40}$/.test(s)) return { kind: 'evm', address: s.toLowerCase() };
+  if (isSolanaAddress(s)) return { kind: 'solana', address: s };
+  return null;
+}
+
+function isSolanaAddress(s) {
+  if (s.length < 32 || s.length > 44) return false;
+  if (!/^[1-9A-HJ-NP-Za-km-z]+$/.test(s)) return false;
+  const bytes = base58Decode(s);
+  return !!bytes && bytes.length === 32;
+}
+
+function base58Decode(s) {
+  let zeros = 0;
+  while (zeros < s.length && s[zeros] === '1') zeros++;
+  const acc = [];
+  for (let i = zeros; i < s.length; i++) {
+    let carry = BASE58_ALPHABET.indexOf(s[i]);
+    if (carry < 0) return null;
+    for (let j = 0; j < acc.length; j++) {
+      carry += acc[j] * 58;
+      acc[j] = carry & 255;
+      carry = Math.floor(carry / 256);
+    }
+    while (carry > 0) {
+      acc.push(carry & 255);
+      carry = Math.floor(carry / 256);
+    }
+  }
+  const out = new Uint8Array(zeros + acc.length);
+  for (let i = 0; i < acc.length; i++) out[out.length - 1 - i] = acc[i];
+  return out;
+}
+
+
 /* ---------- state ---------- */
 const state = {
   s1: null, s2: null,                  // per-user season data
@@ -507,20 +548,27 @@ function setBusy(b) { $('check').disabled = b; $('random').disabled = b; }
 
 async function lookup(opts) {
   opts = opts || {};
-  const addr = $('addr').value.trim().toLowerCase();
-  if (!/^0x[0-9a-f]{40}$/.test(addr)) {
-    setStatus('That does not look like a valid EVM address (0x + 40 hex characters).', 'err');
+  const parsed = parseWalletAddress($('addr').value);
+  if (!parsed) {
+    setStatus('That does not look like a valid EVM or Solana address.', 'err');
     return false;
   }
+  const addr = parsed.address;
   const seq = ++lookupSeq;                 // only the newest lookup may touch the UI
   setBusy(true);
   setStatus('Fetching pips from Apyx…');
   $('results').classList.add('hidden');
   $('calc-section').classList.add('hidden');
   try {
+    const userUrl = season => `${API}/seasons/${season}/users/${encodeURIComponent(addr)}`;
     const [s1, s2, ov2] = await Promise.all([
-      fetchJson(`${API}/seasons/1/users/${addr}`),
-      fetchJson(`${API}/seasons/2/users/${addr}`),
+      fetchJson(userUrl(1)).catch(err => {
+        if (parsed.kind === 'solana') {
+          return { totalPoints: '0', rank: null, referralPoints: '0', alumniMultiplier: '0', _unavailable: true };
+        }
+        throw err;
+      }),
+      fetchJson(userUrl(2)),
       fetchJson(`${API}/seasons/2/overview`).catch(() => null),
     ]);
     if (seq !== lookupSeq) return false;    // superseded by a newer lookup
@@ -555,7 +603,7 @@ function renderResults(addr) {
 
   $('results-addr').textContent = addr.slice(0, 6) + '…' + addr.slice(-4);
   $('s1-pips').textContent = fmtPips(s1p);
-  $('s1-sub').innerHTML = s1p > 0 ? '&nbsp;' : 'No Season 1 pips for this address';
+  $('s1-sub').innerHTML = s1p > 0 ? '&nbsp;' : (state.s1._unavailable ? 'Season 1 data is not available for this address' : 'No Season 1 pips for this address');
   $('s2-pips').textContent = fmtPips(s2p);
   $('s2-sub').innerHTML = s2p > 0 ? '&nbsp;' : 'No Season 2 pips (yet) for this address';
 
@@ -721,8 +769,9 @@ $('random').addEventListener('click', async () => {
 });
 
 const qsAddr = new URLSearchParams(location.search).get('a');
-if (qsAddr && /^0x[0-9a-fA-F]{40}$/.test(qsAddr)) {
-  $('addr').value = qsAddr;
+const qsParsed = qsAddr ? parseWalletAddress(qsAddr) : null;
+if (qsParsed) {
+  $('addr').value = qsParsed.address;
   lookup();
 }
 </script>
